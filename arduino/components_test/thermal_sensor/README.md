@@ -7,4 +7,4 @@
 ### Input - Arduino
 - PIN 2 (digital)
 
-![concept](/concept/irl.jpg)
+![concept](https://raw.githubusercontent.com/CrBast/distillation_column/master/arduino/components_test/thermal_sensor/concept/irl.jpg)
