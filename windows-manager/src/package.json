@@ -1,0 +1,21 @@
+{
+  "name": "viewer",
+  "version": "1.0.0",
+  "description": "Arduino Uno datas Viewer",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/CrBast/distillation_column",
+  "keywords": [
+    "Electron",
+    "Arduino Uno",
+    "Serial Communication"
+  ],
+  "author": "Bastien Crettenand",
+  "license": "Unlicense",
+  "devDependencies": {
+    "electron": "^5.0.0",
+    "serialport": "^7.1.5"
+  }
+}
