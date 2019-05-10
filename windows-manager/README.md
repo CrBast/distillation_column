@@ -9,4 +9,4 @@
 - NodeJS -> `.>node main.js`
 
 ## Create package 
-[Tutorial]([https://link](https://www.christianengvall.se/electron-packager-tutorial/))
+**[Tutorial](https://www.christianengvall.se/electron-packager-tutorial/)**
