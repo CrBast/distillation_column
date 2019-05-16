@@ -1,5 +1,5 @@
 # distillation_column
-Distillation Column Concept - Arduino Uno &amp; ElectronJS (& SerialPortJS)
+Distillation Column Concept - Arduino Uno &amp; C#
 
 ## The purpose
 1. Manage the temperature of a resistor
