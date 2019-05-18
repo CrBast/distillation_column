@@ -20,18 +20,81 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 /********************************************************************/
 
+double todo_temp = 28 ;
+double ambiant_temp = 25;
+double actual_temp;
+
+int activity = 0;
+int loop_occurence = 10;
+int loop_numberOccurence = 10;
+int loop_onSameTemp = 0;
+double loop_lastTemp;
+
+int trans = 8;
+
 void setup(void)
 {
   Serial.begin(9600);
-
+  pinMode(trans, OUTPUT);
   sensors.begin();
+  digitalWrite(trans, LOW);
 }
 void loop(void)
 {
-  sensors.requestTemperatures(); // Send the command to get temperature readings 
+  proportional_control();
+}
 
-  Serial.println(sensors.getTempCByIndex(0)); 
+// V1 Propotional Control Algo
+void proportional_control(){
+  double diff = todo_temp - ambiant_temp;
+  if (loop_numberOccurence >= loop_occurence){
+    loop_numberOccurence = 0;
+    
+    sensors.requestTemperatures(); // Send the command to get temperature readings 
+    actual_temp = sensors.getTempCByIndex(0);
+    //Serial.println(activity);
+    
+    Serial.print(actual_temp);
+    Serial.print(", ");
+    Serial.print(activity);
+    Serial.print("\n");
+    if(todo_temp < actual_temp){
+      activity = 0;
+      return;
+    }
+    double actual_diff = todo_temp - actual_temp;
+    if(actual_diff > (20*diff/100)){
+      activity = 1000;
+    }
+    else{
+      int temp_activity = (int)(actual_diff * 100 / (20*diff/100));
+
+      if(actual_temp == loop_lastTemp){
+        loop_onSameTemp ++;
+        if(loop_onSameTemp > 2){
+          temp_activity -= 2;
+        }
+      } else {
+        loop_onSameTemp = 0;
+      }
+      
+      if(temp_activity < 0){
+        activity = 0;
+      }
+      else {
+        activity = (int)temp_activity*10+5;
+      }
+    }
+    loop_lastTemp = actual_temp;
+    return;
+  }
   
-  delay(1000);
+  if(loop_numberOccurence <= activity){
+    digitalWrite(trans, HIGH);
+  }
+  else{
+     digitalWrite(trans, LOW);
+  }
+  loop_numberOccurence++;
 }
 
