@@ -25,12 +25,14 @@ double ambiant_temp = 25;
 double actual_temp;
 
 int activity = 0;
-int loop_occurence = 10;
-int loop_numberOccurence = 10;
+int loop_occurence = 1000;
+int loop_numberOccurence = 1000;
 int loop_onSameTemp = 0;
 double loop_lastTemp;
 
 int trans = 8;
+
+long testInt = 0;
 
 void setup(void)
 {
@@ -41,26 +43,37 @@ void setup(void)
 }
 void loop(void)
 {
-  proportional_control();
+  //sensors.requestTemperatures(); // Send the command to get temperature readings 
+  ambiant_temp = 25; //sensors.getTempCByIndex(0);
+  do{
+    
+  }while(!proportional_control());// Wait the sensor go to <todo_temp>
+  Serial.println("Start");
+  do{
+    testInt++;
+    proportional_control();
+  }while(testInt <= 76433); // 76433 ~= 60 seconds
+  Serial.println("Stop");
+  testInt=0;
 }
 
-// V1 Propotional Control Algo
-void proportional_control(){
+// V1.1 Propotional Control Algo
+// One full loop = 0.785 seconds <-> 785 miliseconds
+bool proportional_control(){
   double diff = todo_temp - ambiant_temp;
   if (loop_numberOccurence >= loop_occurence){
     loop_numberOccurence = 0;
     
     sensors.requestTemperatures(); // Send the command to get temperature readings 
     actual_temp = sensors.getTempCByIndex(0);
-    //Serial.println(activity);
     
-    Serial.print(actual_temp);
-    Serial.print(", ");
-    Serial.print(activity);
-    Serial.print("\n");
+    
+    Serial.println(actual_temp);
+    Serial.println(activity);
+    
     if(todo_temp < actual_temp){
-      activity = 0;
-      return;
+      activity = 10;
+      return true;
     }
     double actual_diff = todo_temp - actual_temp;
     if(actual_diff > (20*diff/100)){
@@ -72,7 +85,10 @@ void proportional_control(){
       if(actual_temp == loop_lastTemp){
         loop_onSameTemp ++;
         if(loop_onSameTemp > 2){
-          temp_activity -= 2;
+          temp_activity += 3;
+        }
+        if(loop_onSameTemp > 4){
+          temp_activity += 2;
         }
       } else {
         loop_onSameTemp = 0;
@@ -82,11 +98,12 @@ void proportional_control(){
         activity = 0;
       }
       else {
-        activity = (int)temp_activity*10+5;
+        activity = (int)temp_activity*100+50;
       }
     }
     loop_lastTemp = actual_temp;
-    return;
+    
+    return todo_temp == actual_temp;
   }
   
   if(loop_numberOccurence <= activity){
@@ -96,5 +113,6 @@ void proportional_control(){
      digitalWrite(trans, LOW);
   }
   loop_numberOccurence++;
+  return false;
 }
 
