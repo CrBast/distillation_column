@@ -57,7 +57,7 @@ void loop(void)
   testInt=0;
 }
 
-// V1.1 Propotional Control Algo
+// V1.2 Propotional Control Algo
 // One full loop = 0.785 seconds <-> 785 miliseconds
 bool proportional_control(){
   double diff = todo_temp - ambiant_temp;
@@ -70,49 +70,66 @@ bool proportional_control(){
     
     Serial.println(actual_temp);
     Serial.println(activity);
+  
+    if(actual_temp >= todo_temp){
+      if((double)(actual_temp - todo_temp) >= (double)(diff*3/100)){
+        activity = 0;
+      } else {
+        if(actual_temp == todo_temp){
+          activity = 100;
+        } else{
+          activity = 50;
+        }
+      }
+    }else{
+      double actual_diff = todo_temp - actual_temp;
+      if(actual_diff > (20*diff/100)){
+        activity = 1000;
+      }
+      else{
+        int temp_activity = (int)(actual_diff * 100 / (20*diff/100));
+  
+        if(actual_temp == loop_lastTemp && actual_temp <= todo_temp){
+          loop_onSameTemp ++;
+          if(loop_onSameTemp > 1){
+            temp_activity += 0.5;
+          }
+          if(loop_onSameTemp > 2){
+            temp_activity += 1;
+          }
+        } else {
+          loop_onSameTemp = 0;
+        }
+        
+        if(temp_activity < 0){
+          activity = 0;
+        }
+        else {
+          if(temp_activity <= 35){
+            activity = (int)temp_activity*100-100;
+          }
+          else{
+            activity = (int)temp_activity*100;
+          }
+        }
+      }
+      loop_lastTemp = actual_temp;
+    }
     
-    if(todo_temp < actual_temp){
-      activity = 10;
+    if(actual_temp >= todo_temp) {
       return true;
     }
-    double actual_diff = todo_temp - actual_temp;
-    if(actual_diff > (20*diff/100)){
-      activity = 1000;
-    }
     else{
-      int temp_activity = (int)(actual_diff * 100 / (20*diff/100));
-
-      if(actual_temp == loop_lastTemp){
-        loop_onSameTemp ++;
-        if(loop_onSameTemp > 2){
-          temp_activity += 3;
-        }
-        if(loop_onSameTemp > 4){
-          temp_activity += 2;
-        }
-      } else {
-        loop_onSameTemp = 0;
-      }
-      
-      if(temp_activity < 0){
-        activity = 0;
-      }
-      else {
-        activity = (int)temp_activity*100+50;
-      }
+      return false;
     }
-    loop_lastTemp = actual_temp;
-    
-    return todo_temp == actual_temp;
   }
   
   if(loop_numberOccurence <= activity){
     digitalWrite(trans, HIGH);
   }
   else{
-     digitalWrite(trans, LOW);
+    digitalWrite(trans, LOW);
   }
   loop_numberOccurence++;
   return false;
 }
-
