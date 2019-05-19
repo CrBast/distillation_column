@@ -139,15 +139,15 @@ bool proportional_control(){
     Serial.println(activity);*/
     ldcSetTextByLine(0, "\t" + (String)actual_temp + "\tC");
     ldcSetTextByLine(1, "\t" + (String)state + "\t" + (String)activity);
-    
+  
     if(actual_temp >= todo_temp){
       if((double)(actual_temp - todo_temp) >= (double)(diff*3/100)){
         activity = 0;
       } else {
         if(actual_temp == todo_temp){
-          activity = 50;
+          activity = 100;
         } else{
-          activity = 20;
+          activity = 50;
         }
       }
     }else{
@@ -174,8 +174,8 @@ bool proportional_control(){
           activity = 0;
         }
         else {
-          if(temp_activity <= 50){
-            activity = (int)temp_activity*100-500;
+          if(temp_activity <= 35){
+            activity = (int)temp_activity*100-100;
           }
           else{
             activity = (int)temp_activity*100;
@@ -197,7 +197,7 @@ bool proportional_control(){
     digitalWrite(trans, HIGH);
   }
   else{
-     digitalWrite(trans, LOW);
+    digitalWrite(trans, LOW);
   }
   loop_numberOccurence++;
   return false;
