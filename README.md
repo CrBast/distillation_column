@@ -10,4 +10,11 @@ Distillation Column Concept - Arduino Uno &amp; C#
 - **Thermal Sensor** (*DS18B20 - Dallas*)
 - **Transistor** (*BD675*)
 - **100 Ω resistance**
-- **2 x LED**
+- **2 xc LED**
+
+# Schema
+![schema_cable](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema_cable.PNG)
+
+<br>
+
+![schema](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema.PNG)
