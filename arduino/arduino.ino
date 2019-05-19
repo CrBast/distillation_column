@@ -30,6 +30,14 @@ double todo_temp = 28 ;
 double ambiant_temp = 25;
 double actual_temp;
 
+int state = 0;
+int ledOnOff = 9;
+int ledBusy = 8;
+int btnOnOff = 13;
+bool btnOnOff_lastState = false;
+int btnStartWork = 12;
+bool btnStartWork_lastState = true;
+
 int activity = 0;
 int loop_occurence = 1000;
 int loop_numberOccurence = 1000;
@@ -45,8 +53,19 @@ void setup(void)
   lcd.begin(16, 2);
   Serial.begin(9600);
   pinMode(trans, OUTPUT);
-  sensors.begin();
+  pinMode(ledBusy, OUTPUT);
+  pinMode(ledOnOff, OUTPUT);
+  pinMode(btnOnOff, INPUT);
+  pinMode(btnStartWork, INPUT);
+
   digitalWrite(trans, LOW);
+  digitalWrite(ledBusy, LOW);
+  digitalWrite(ledOnOff, LOW);
+
+  sensors.begin();
+
+  sensors.requestTemperatures(); // Send the command to get temperature readings 
+  ambiant_temp = 24; //sensors.getTempCByIndex(0);
 }
 void loop(void)
 {
@@ -62,7 +81,46 @@ void loop(void)
   }while(testInt <= 76433); // 76433 ~= 60 seconds
   Serial.println("Stop");
   testInt=0;*/
-  proportional_control();
+	switch (state)
+	{
+		case 0:
+			if (digitalRead(btnOnOff) == HIGH) {
+				state = 1;
+				digitalWrite(ledOnOff, HIGH);
+			}
+			break;
+		case 1 :
+			sensors.requestTemperatures(); // Send the command to get temperature readings 
+			actual_temp = sensors.getTempCByIndex(0);
+
+
+			Serial.println(actual_temp);
+			ldcSetTextByLine(0, "\t" + (String)actual_temp + "\tC");
+			ldcSetTextByLine(1, "\t" + (String)state);
+
+			if (digitalRead(btnStartWork) == HIGH) {
+				state = 2;
+			}
+			break;
+		case 2:
+			do {
+
+			} while (!proportional_control());// Wait the sensor go to <todo_temp>
+			state = 3;
+			break;
+		case 3:
+			digitalWrite(ledBusy, HIGH);
+			long testInt = 0;
+			do {
+				testInt++;
+				proportional_control();
+			} while (testInt <= 76433); // 76433 ~= 60 seconds
+			digitalWrite(trans, LOW);
+			digitalWrite(ledBusy, LOW);
+			state = 1;
+			break;
+	}
+	// Test digitalRead(btnOnOff) change -> Force stop
 }
 
 // V1.2 Propotional Control Algo
@@ -76,19 +134,20 @@ bool proportional_control(){
     actual_temp = sensors.getTempCByIndex(0);
     
     
-    //Serial.println(actual_temp);
-    //Serial.println(activity);
-    ldcSetTextByLine(0, (String)actual_temp);
-    ldcSetTextByLine(1, (String)activity);
+    Serial.println(actual_temp);
+    /*Serial.print(", ");
+    Serial.println(activity);*/
+    ldcSetTextByLine(0, "\t" + (String)actual_temp + "\tC");
+    ldcSetTextByLine(1, "\t" + (String)state + "\t" + (String)activity);
     
     if(actual_temp >= todo_temp){
       if((double)(actual_temp - todo_temp) >= (double)(diff*3/100)){
         activity = 0;
       } else {
         if(actual_temp == todo_temp){
-          activity = 100;
-        } else{
           activity = 50;
+        } else{
+          activity = 20;
         }
       }
     }else{
@@ -115,8 +174,8 @@ bool proportional_control(){
           activity = 0;
         }
         else {
-          if(temp_activity <= 35){
-            activity = (int)temp_activity*100-100;
+          if(temp_activity <= 50){
+            activity = (int)temp_activity*100-500;
           }
           else{
             activity = (int)temp_activity*100;
