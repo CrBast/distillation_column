@@ -144,10 +144,15 @@ namespace Windows
         private void lbxCom_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var lbx = (ListBox)sender;
-            ArduinoConnection.setCOM(lbx.SelectedItem.ToString());
+            if(lbx.SelectedItem != null)
+            {
+                btn_closeCOM.IsEnabled = true;
+                ArduinoConnection.setCOM(lbx.SelectedItem.ToString());
 
-            ArduinoConnection.GetInstance().DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
-            ArduinoConnection.Go();
+                ArduinoConnection.GetInstance().DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+                ArduinoConnection.Go();
+                AddLog($"Connection to {ArduinoConnection.GetInstance().PortName} is open\r\n");
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -155,6 +160,15 @@ namespace Windows
             ArduinoConnection.GetInstance().DataReceived -= new SerialDataReceivedEventHandler(DataReceivedHandler);
             ArduinoConnection.Close();
             tbxLogs.Clear();
+        }
+
+        private void btn_closeCOM_Click(object sender, RoutedEventArgs e)
+        {
+            ArduinoConnection.GetInstance().DataReceived -= new SerialDataReceivedEventHandler(DataReceivedHandler);
+            ArduinoConnection.Close();
+            lbxCom.UnselectAll();
+            AddLog($"Connection to {ArduinoConnection.GetInstance().PortName} is closed\r\n");
+            btn_closeCOM.IsEnabled = false;
         }
     }
 }
