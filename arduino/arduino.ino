@@ -66,7 +66,7 @@ void setup(void)
   sensors.begin();
 
   sensors.requestTemperatures(); // Send the command to get temperature readings
-  ambiant_temp = 22;             //sensors.getTempCByIndex(0);
+  ambiant_temp = 24; //sensors.getTempCByIndex(0);
 }
 void loop(void)
 {
@@ -95,10 +95,11 @@ void loop(void)
     sensors.requestTemperatures(); // Send the command to get temperature readings
     actual_temp = sensors.getTempCByIndex(0);
 
-    Serial.println(actual_temp);
+    Serial.println("-i " + (String)actual_temp);
+    Serial.println("-s " + (String)state);
     ldcSetTextByLine(0, "\t" + (String)actual_temp + "\tC");
     ldcSetTextByLine(1, "\t" + (String)state);
-
+    
     if (digitalRead(btnStartWork) == HIGH)
     {
       state = 2;
@@ -147,12 +148,14 @@ bool proportional_control()
     sensors.requestTemperatures(); // Send the command to get temperature readings
     actual_temp = sensors.getTempCByIndex(0);
 
-    Serial.println(actual_temp);
-    Serial.println(" - " + (String)loop_startingProportion);
+    
     /*Serial.print(", ");
     Serial.println(activity);*/
     ldcSetTextByLine(0, "\t" + (String)actual_temp + "\tC");
     ldcSetTextByLine(1, "\t" + (String)state + "\t" + (String)activity);
+
+    Serial.println("-i " + (String)actual_temp);
+    Serial.println("-s " + (String)state);
 
     int diffBtw25AndActualTemp = 25 - ambiant_temp;
           if(diffBtw25AndActualTemp <= 0){
