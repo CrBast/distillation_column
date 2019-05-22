@@ -19,7 +19,7 @@
             <Label Name="state_def" Content="Etat actuel : " Foreground="White" FontSize="40"  HorizontalAlignment="Left" Margin="10,185,0,0" VerticalAlignment="Top" FontFamily="Century Gothic"/>
             <Label x:Name="lbl_state" Content="..." Foreground="White" FontSize="40"  HorizontalAlignment="Left" Margin="318,185,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontWeight="Bold" FontStyle="Italic"/>
             <Grid HorizontalAlignment="Left" Margin="10,267,0,0" Width="432" Height="245" VerticalAlignment="Top">
-                <lvc:AngularGauge Grid.Row="1" Value="{Binding Value}" FromValue="25.00" ToValue="30.00" 
+                <lvc:AngularGauge Grid.Row="1" Name="gauge" Value="{Binding Value}" FromValue="25.00" ToValue="30.00" 
                           LabelsStep="0.5" TicksStep="25" Wedge="300"
                           TicksForeground="White" Foreground="White" 
                           FontWeight="Bold" FontSize="16"
@@ -33,10 +33,10 @@
             <Button x:Name="btn_closeCOM" IsEnabled="False" Content="Close connection" HorizontalAlignment="Left" Margin="248,49,0,0" VerticalAlignment="Top" Width="175" Height="30"/>
         </Grid>
         <Grid Height="161" Margin="457,0,0,0" VerticalAlignment="Top">
-            <TextBox x:Name="tbxLogs" Background="#1F1B24" HorizontalAlignment="Stretch" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="true" VerticalAlignment="Stretch" UseLayoutRounding="False" Foreground="White"/>
+            <TextBox x:Name="tbxLogs" MaxLines="10" Background="#1F1B24" HorizontalAlignment="Stretch" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="true" VerticalAlignment="Stretch" UseLayoutRounding="False" Foreground="White"/>
         </Grid>
         <Grid Margin="457,166,0,0" Background="#1F1B24">
-            <lvc:CartesianChart Grid.Row="1" AnimationsSpeed="0:0:0.5" Hoverable="False" DataTooltip="{x:Null}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,10,10,10">
+            <lvc:CartesianChart Name="temp_vizualizer" Grid.Row="1" AnimationsSpeed="0:0:0.5" Hoverable="False" DataTooltip="{x:Null}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,10,10,10">
                 <lvc:CartesianChart.Series>
                     <lvc:LineSeries Values="{Binding ChartValues}" 
                                     PointGeometry="{x:Null}" 
@@ -47,8 +47,6 @@
                 </lvc:CartesianChart.Series>
                 <lvc:CartesianChart.AxisX>
                     <lvc:Axis LabelFormatter="{Binding DateTimeFormatter}" 
-                              MaxValue="{Binding AxisMax}" 
-                              MinValue="{Binding AxisMin}"
                               Unit="{Binding AxisUnit}">
                         <lvc:Axis.Separator>
                             <lvc:Separator Step="{Binding AxisStep}" />

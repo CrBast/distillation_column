@@ -18,53 +18,15 @@ namespace Windows
     /// </summary>
     public partial class MainWindow : Window
     {
-        SerialPort sp;
-        private double _value;
+        private string incomplete_request = null;
+
         public MainWindow()
         {
             InitializeComponent();
 
-            SeriesCollection = new SeriesCollection
-            {
-                new LineSeries
-                {
-                    Title = "Series 1",
-                    Values = new ChartValues<double> { 4, 6, 5, 2 ,4 }
-                },
-                new LineSeries
-                {
-                    Title = "Series 2",
-                    Values = new ChartValues<double> { 6, 7, 3, 4 ,6 },
-                    PointGeometry = null
-                },
-                new LineSeries
-                {
-                    Title = "Series 3",
-                    Values = new ChartValues<double> { 4,2,7,2,7 },
-                    PointGeometry = DefaultGeometries.Square,
-                    PointGeometrySize = 15
-                }
-            };
-
-            Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" };
-            YFormatter = value => value.ToString("C");
-
-            //modifying the series collection will animate and update the chart
-            SeriesCollection.Add(new LineSeries
-            {
-                Title = "Series 4",
-                Values = new ChartValues<double> { 5, 3, 2, 4 },
-                LineSmoothness = 0, //0: straight lines, 1: really smooth lines
-                PointGeometry = Geometry.Parse("m 25 70.36218 20 -28 -20 22 -8 -6 z"),
-                PointGeometrySize = 50,
-                PointForeground = Brushes.Gray
-            });
-
-            //modifying any series values will also animate and update the chart
-            SeriesCollection[3].Values.Add(5d);
-
             DataContext = this;
 
+            gauge.Value = 25;
 
             string[] ports = SerialPort.GetPortNames();
             foreach (string port in ports)
@@ -73,16 +35,6 @@ namespace Windows
             }
 
             
-        }
-
-        public double Value
-        {
-            get { return _value; }
-            set
-            {
-                _value = value;
-                OnPropertyChanged("Value");
-            }
         }
 
         public SeriesCollection SeriesCollection { get; set; }
@@ -96,9 +48,6 @@ namespace Windows
 
         public void AddLog(string text)
         {
-            //text = text.Replace("\r", string.Empty);
-            //text = text.Replace("\n", string.Empty);
-            string last = Regex.Split(text, "\r\n").Last();
             Dispatcher.Invoke(() =>
             {
                 tbxLogs.AppendText(text.ToString());
@@ -109,55 +58,76 @@ namespace Windows
 
         public void commanderOfCommand(string text)
         {
-            text = Regex.Split(text, "\r\n").Last();
+            AddLog(text);
+            var requests = COMStringSplitter(text);
 
-            text = text.Replace("\r", string.Empty);
 
-            text = text.Replace("\n", string.Empty);
-
-            if (text.StartsWith("-i"))
+            foreach(Request request in requests)
             {
-                try
+                switch (request.Type)
                 {
-                    Value = Convert.ToDouble(text.Replace("-i ", string.Empty));
+                    case Request.Type_State:
+                        Dispatcher.Invoke(() =>
+                        {
+                            lbl_state.Content = request.Content;
+                        });
+                        break;
+                    case Request.Type_Info:
+                        Dispatcher.Invoke(() =>
+                        {
+                            try
+                            {
+                                gauge.Value = Convert.ToDouble(request.Content.Replace(".", ","));
+                            }
+                            catch(Exception e) { Console.Write(e); }
+                        });
+                        break;
                 }
-                catch { }
-                return;
+                    
             }
-            if (text.StartsWith("-s"))
-            {
-                string result = text.Replace("-s ", string.Empty);
-                lbl_state.Content = result == "" || result == "-s" ? lbl_state.Content : result;
-                return;
-            } 
         }
 
 
-        public static List<Request> COMStringSplitter(string s)
+        public  List<Request> COMStringSplitter(string s)
         {
             List<Request> array = new List<Request>();
+
+            if(incomplete_request != null)
+            {
+                s = incomplete_request + s;
+            }
+
             var requests = Regex.Split(s, "\r\n").ToList();
             foreach (var request in requests)
             {
                 Request r = new Request();
-                if (request.StartsWith("-i"))
+                r.FullRequest = request;
+                if (request.StartsWith(Request.Type_Info))
                 {
                     r.Type = Request.Type_Info;
-                    r.Content = request.Replace("-i ", string.Empty);
-                    array.Add(r);
+                    r.Content = request.Replace(Request.Type_Info.ToString(), string.Empty);
                 }
-                else if (request.StartsWith("-h"))
+                else if (request.StartsWith(Request.Type_HeatingPower))
                 {
                     r.Type = Request.Type_HeatingPower;
-                    r.Content = request.Replace("-h ", string.Empty);
-                    array.Add(r);
+                    r.Content = request.Replace(Request.Type_HeatingPower.ToString(), string.Empty);
                 }
-                else if (request.StartsWith("-s"))
+                else if (request.StartsWith(Request.Type_State))
                 {
                     r.Type = Request.Type_State;
-                    r.Content = request.Replace("-s ", string.Empty);
-                    array.Add(r);
+                    r.Content = request.Replace(Request.Type_State.ToString(), string.Empty);
                 }
+                array.Add(r);
+            }
+            if (!s.EndsWith("\r\n"))
+            {
+                var lastCommand = array[array.Count - 1];
+                incomplete_request = lastCommand.FullRequest;
+                array.Remove(lastCommand);
+            }
+            else
+            {
+                incomplete_request = null;
             }
             return array;
         }
@@ -173,42 +143,18 @@ namespace Windows
 
         private void lbxCom_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sp != null) {
-                sp = null;
-            }
+            var lbx = (ListBox)sender;
+            ArduinoConnection.setCOM(lbx.SelectedItem.ToString());
 
-            try
-            {
-                var lbx = (ListBox)sender;
-                sp = new SerialPort(lbx.SelectedItem.ToString());
-                sp.BaudRate = 9600;
-                sp.Parity = Parity.None;
-                sp.StopBits = StopBits.One;
-                sp.DataBits = 8;
-                sp.Handshake = Handshake.None;
-                sp.RtsEnable = true;
-
-                sp.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
-
-                sp.DataReceived -= new SerialDataReceivedEventHandler(DataReceivedHandler);
-            sp.Open();
-            } catch {
-                sp = null;
-            }
+            ArduinoConnection.GetInstance().DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+            ArduinoConnection.Go();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if(sp != null)
-                sp.Close();
-        }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName = null)
-        {
-            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            ArduinoConnection.GetInstance().DataReceived -= new SerialDataReceivedEventHandler(DataReceivedHandler);
+            ArduinoConnection.Close();
+            tbxLogs.Clear();
         }
     }
 }

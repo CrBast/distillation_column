@@ -8,9 +8,9 @@ namespace Windows
 {
     public class Request
     {
-        private int type;
+        private string type;
 
-        public int Type
+        public string Type
         {
             get
             {
@@ -36,10 +36,14 @@ namespace Windows
             }
         }
 
+        public string FullRequest { get => fullRequest; set => fullRequest = value; }
+
+        private string fullRequest;
+
         private string content;
 
-        public static int Type_Info = 1;
-        public static int Type_State = 2;
-        public static int Type_HeatingPower = 3;
+        public const string Type_Info = "-i";
+        public const string Type_State = "-s";
+        public const string Type_HeatingPower = "-p";
     }
 }
