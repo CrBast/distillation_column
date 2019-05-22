@@ -18,3 +18,7 @@ Heating System Concept - Arduino Uno &amp; WPF
 <br>
 
 ![schema](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema.PNG)
+
+# Schematic view
+
+![schema_electrique](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema_electrique.PNG)
