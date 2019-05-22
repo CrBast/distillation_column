@@ -1,5 +1,5 @@
-# distillation_column
-Distillation Column Concept - Arduino Uno &amp; C#
+# Arduino heating system project
+Heating System Concept - Arduino Uno &amp; WPF
 
 ## The purpose
 1. Manage the temperature of a resistor
