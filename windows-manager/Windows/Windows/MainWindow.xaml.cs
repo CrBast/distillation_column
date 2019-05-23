@@ -1,40 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using Windows;
 using LiveCharts;
-using LiveCharts.Wpf;
-using System.ComponentModel;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace Windows
+namespace Arduino_Viewer
 {
     /// <summary>
     /// Logique d'interaction pour MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
-        private string incomplete_request = null;
-
+        public static int Counter = 0;
         public MainWindow()
         {
             InitializeComponent();
 
             DataContext = this;
 
-            gauge.Value = 25;
+            Gauge.Value = 25;
 
-            string[] ports = SerialPort.GetPortNames();
-            foreach (string port in ports)
-            {
-                lbxCom.Items.Add(port);
-            }
-
-            
+            /*Points.Add(new DataPoint(1, 2.5));
+            Points.Add(new DataPoint(2, 2.3));*/
         }
 
         public SeriesCollection SeriesCollection { get; set; }
@@ -43,41 +32,44 @@ namespace Windows
 
         public void AddNewTemperature(double temp)
         {
-
+            Counter++;
+            //ToDo
         }
 
         public void AddLog(string text)
         {
             Dispatcher.Invoke(() =>
             {
-                tbxLogs.AppendText(text.ToString());
-                tbxLogs.ScrollToEnd();                
+                TbxLogs.AppendText(text);
+                TbxLogs.ScrollToEnd();                
             });
         }
 
 
-        public void commanderOfCommand(string text)
+        public void CommanderOfCommand(string text)
         {
             AddLog(text);
-            var requests = COMStringSplitter(text);
+            var requests = ComStringSplitter(text);
 
 
             foreach(Request request in requests)
             {
                 switch (request.Type)
                 {
-                    case Request.Type_State:
+                    case Request.TypeState:
                         Dispatcher.Invoke(() =>
                         {
-                            lbl_state.Content = request.Content;
+                            LblState.Content = request.Content;
                         });
                         break;
-                    case Request.Type_Info:
+                    case Request.TypeInfo:
                         Dispatcher.Invoke(() =>
                         {
                             try
                             {
-                                gauge.Value = Convert.ToDouble(request.Content.Replace(".", ","));
+                                var temperature = Convert.ToDouble(request.Content.Replace(".", ","));
+                                AddNewTemperature(temperature);
+                                Gauge.Value = temperature;
                             }
                             catch(Exception e) { Console.Write(e); }
                         });
@@ -88,46 +80,32 @@ namespace Windows
         }
 
 
-        public  List<Request> COMStringSplitter(string s)
+        public  List<Request> ComStringSplitter(string s)
         {
             List<Request> array = new List<Request>();
 
-            if(incomplete_request != null)
-            {
-                s = incomplete_request + s;
-            }
+            var requests = ArduinoConnection.GetRequests(s);
 
-            var requests = Regex.Split(s, "\r\n").ToList();
             foreach (var request in requests)
             {
-                Request r = new Request();
-                r.FullRequest = request;
-                if (request.StartsWith(Request.Type_Info))
+
+                Request r = new Request {FullRequest = request};
+                if (request.StartsWith(Request.TypeInfo))
                 {
-                    r.Type = Request.Type_Info;
-                    r.Content = request.Replace(Request.Type_Info.ToString(), string.Empty);
+                    r.Type = Request.TypeInfo;
+                    r.Content = request.Replace(Request.TypeInfo, string.Empty);
                 }
-                else if (request.StartsWith(Request.Type_HeatingPower))
+                else if (request.StartsWith(Request.TypeHeatingPower))
                 {
-                    r.Type = Request.Type_HeatingPower;
-                    r.Content = request.Replace(Request.Type_HeatingPower.ToString(), string.Empty);
+                    r.Type = Request.TypeHeatingPower;
+                    r.Content = request.Replace(Request.TypeHeatingPower, string.Empty);
                 }
-                else if (request.StartsWith(Request.Type_State))
+                else if (request.StartsWith(Request.TypeState))
                 {
-                    r.Type = Request.Type_State;
-                    r.Content = request.Replace(Request.Type_State.ToString(), string.Empty);
+                    r.Type = Request.TypeState;
+                    r.Content = request.Replace(Request.TypeState, string.Empty);
                 }
                 array.Add(r);
-            }
-            if (!s.EndsWith("\r\n"))
-            {
-                var lastCommand = array[array.Count - 1];
-                incomplete_request = lastCommand.FullRequest;
-                array.Remove(lastCommand);
-            }
-            else
-            {
-                incomplete_request = null;
             }
             return array;
         }
@@ -136,9 +114,8 @@ namespace Windows
                         object sender,
                         SerialDataReceivedEventArgs e)
         {
-            SerialPort sp = (SerialPort)sender;
-            string indata = sp.ReadExisting();
-            commanderOfCommand(indata);
+            var sp = (SerialPort)sender;
+            CommanderOfCommand(sp.ReadExisting());
         }
 
         private void lbxCom_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -146,10 +123,10 @@ namespace Windows
             var lbx = (ListBox)sender;
             if(lbx.SelectedItem != null)
             {
-                btn_closeCOM.IsEnabled = true;
-                ArduinoConnection.setCOM(lbx.SelectedItem.ToString());
+                BtnCloseCom.IsEnabled = true;
+                ArduinoConnection.SetCom(lbx.SelectedItem.ToString());
 
-                ArduinoConnection.GetInstance().DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+                ArduinoConnection.GetInstance().DataReceived += DataReceivedHandler;
                 ArduinoConnection.Go();
                 AddLog($"Connection to {ArduinoConnection.GetInstance().PortName} is open\r\n");
             }
@@ -157,18 +134,27 @@ namespace Windows
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            ArduinoConnection.GetInstance().DataReceived -= new SerialDataReceivedEventHandler(DataReceivedHandler);
+            ArduinoConnection.GetInstance().DataReceived -= DataReceivedHandler;
             ArduinoConnection.Close();
-            tbxLogs.Clear();
+            TbxLogs.Clear();
         }
 
         private void btn_closeCOM_Click(object sender, RoutedEventArgs e)
         {
-            ArduinoConnection.GetInstance().DataReceived -= new SerialDataReceivedEventHandler(DataReceivedHandler);
+            ArduinoConnection.GetInstance().DataReceived -= DataReceivedHandler;
             ArduinoConnection.Close();
-            lbxCom.UnselectAll();
+            LbxCom.UnselectAll();
             AddLog($"Connection to {ArduinoConnection.GetInstance().PortName} is closed\r\n");
-            btn_closeCOM.IsEnabled = false;
+            BtnCloseCom.IsEnabled = false;
+        }
+
+        private void BtnRefreshCom_Click(object sender, RoutedEventArgs e)
+        {
+            LbxCom.Items.Clear();
+            foreach (string port in SerialPort.GetPortNames())
+            {
+                LbxCom.Items.Add(port);
+            }
         }
     }
 }

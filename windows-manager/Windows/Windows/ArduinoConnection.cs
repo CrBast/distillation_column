@@ -1,30 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Ports;
-using System.Threading;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Windows
 {
     class ArduinoConnection
     {
-        private static SerialPort arduino = new SerialPort() { BaudRate = 9600, Parity = Parity.None, StopBits = StopBits.One, DataBits = 8, Handshake = Handshake.None, RtsEnable = true };
+        private static SerialPort _serialPortArduino = new SerialPort() { BaudRate = 9600, Parity = Parity.None, StopBits = StopBits.One, DataBits = 8, Handshake = Handshake.None, RtsEnable = true };
+
+        private static string _incompleteRequest;
+
+        public static string LineSeparator = "\r\n";
 
         private ArduinoConnection()
         {
 
         }
 
-        public static void setCOM(string com)
+        public static void SetCom(string com)
         {
-            if (arduino != null)
+            if (_serialPortArduino != null)
             {
-                if (arduino.PortName == null)
+                if (_serialPortArduino.PortName == null)
                 {
-                    arduino.PortName = com;
+                    _serialPortArduino.PortName = com;
                 }
                 else
                 {
-                    arduino.Close();
-                    arduino.PortName = com;
+                    _serialPortArduino.Close();
+                    _serialPortArduino.PortName = com;
                 } 
             }
         }
@@ -33,10 +39,10 @@ namespace Windows
         /// Set BaudRate
         /// </summary>
         /// <param name="baudRate">String BaudRate</param>
-        public static void setBaudRate(string baudRate)
+        public static void SetBaudRate(string baudRate)
         {
-            if (arduino != null)
-                arduino.PortName = baudRate;
+            if (_serialPortArduino != null)
+                _serialPortArduino.PortName = baudRate;
         }
 
         /// <summary>
@@ -46,7 +52,7 @@ namespace Windows
         /// <returns></returns>
         public static SerialPort GetInstance()
         {
-            return arduino.PortName == null ? null : arduino;
+            return _serialPortArduino.PortName == null ? null : _serialPortArduino;
         }
 
         /// <summary>
@@ -57,14 +63,13 @@ namespace Windows
         {
             try
             {
-                arduino.Open();
+                _serialPortArduino.Open();
                 return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 return false;
-                throw;
             }
         }
 
@@ -77,15 +82,42 @@ namespace Windows
         {
             try
             {
-                arduino.Close();
+                _serialPortArduino.Close();
                 return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 return false;
-                throw;
             }
+        }
+
+        /// <summary>
+        /// Allows to check that the entry is correct and ends with `lineSeparator`.
+        /// </summary>
+        /// <param name="s">Input string from Arduino</param>
+        /// <returns></returns>
+        public static List<string> GetRequests(string s)
+        {
+            if (_incompleteRequest != null) s = _incompleteRequest + s;
+
+            var requests = Regex.Split(s, LineSeparator).ToList();
+
+            if (!s.EndsWith(LineSeparator))
+            {
+                if (requests.Count != 0)
+                {
+                    var lastCommand = requests[requests.Count - 1];
+                    if (lastCommand == null) return requests;
+                    _incompleteRequest = lastCommand;
+                    requests.Remove(lastCommand);
+                } 
+            }
+            else
+            {
+                _incompleteRequest = null;
+            }
+            return requests;
         }
     }
 }
