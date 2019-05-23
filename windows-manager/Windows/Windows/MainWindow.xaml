@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
-        Title="Arduino Datas Viewer" Height="552.985" Width="1017.91" Closing="Window_Closing" Icon="arrow.ico"
+        Title="Arduino Datas Viewer" Height="669.468" Width="1136.41" Closing="Window_Closing" Icon="arrow.ico"
         >
     <Grid Background="White">
         <Grid HorizontalAlignment="Left" Width="452" Background="#1F1B24">
@@ -17,13 +17,17 @@
             </GroupBox>
             <Label Name="StateDef" Content="Etat actuel : " Foreground="White" FontSize="40"  HorizontalAlignment="Left" Margin="10,185,0,0" VerticalAlignment="Top" FontFamily="Century Gothic"/>
             <Label x:Name="LblState" Content="..." Foreground="White" FontSize="40"  HorizontalAlignment="Left" Margin="318,185,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontWeight="Bold" FontStyle="Italic"/>
-            <Grid HorizontalAlignment="Left" Margin="10,267,0,10" Width="432">
-                <lvc:AngularGauge Grid.Row="1" Name="Gauge" Value="{Binding Value}" FromValue="25.00" ToValue="30.00" 
+            <Grid HorizontalAlignment="Left" Margin="10,326,0,10" Width="432">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="47*"/>
+                    <ColumnDefinition Width="169*"/>
+                </Grid.ColumnDefinitions>
+                <lvc:AngularGauge Name="Gauge" Value="{Binding Value}" FromValue="25.00" ToValue="30.00" 
                           LabelsStep="0.5" TicksStep="25" Wedge="300"
                           TicksForeground="White" Foreground="White" 
                           FontWeight="Bold" FontSize="16"
                           SectionsInnerRadius=".5"
-                          Margin="5,5,5,5">
+                          Margin="5,0,5,5" Grid.ColumnSpan="2">
                     <lvc:AngularGauge.Sections>
                         <lvc:AngularSection FromValue="25.00" ToValue="28.00" Fill="#6B8E23"/>
                         <lvc:AngularSection FromValue="28.00" ToValue="30.00" Fill="#CCCC00"/>
@@ -32,13 +36,16 @@
             </Grid>
             <Button x:Name="BtnCloseCom" IsEnabled="False" Content="Close connection" HorizontalAlignment="Left" Margin="248,49,0,0" VerticalAlignment="Top" Width="175" Height="30" Click="btn_closeCOM_Click"/>
             <Button x:Name="BtnRefreshCom" Content="Refresh COM" HorizontalAlignment="Left" Margin="248,109,0,0" VerticalAlignment="Top" Width="175" Height="30" Click="BtnRefreshCom_Click"/>
+            <Label x:Name="StatePower" Content="Puissance de chauffe : " Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="10,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic"/>
+            <Label x:Name="LblStatePower" Content="..." Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="308,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontWeight="Bold" FontStyle="Italic" Width="80"/>
+            <Label x:Name="sur1000" Content="/1000" Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="373,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontStyle="Italic"/>
         </Grid>
         <Grid Height="161" Margin="457,0,0,0" VerticalAlignment="Top">
             <TextBox x:Name="TbxLogs" MaxLines="10" Background="#1F1B24" HorizontalAlignment="Stretch" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="true" VerticalAlignment="Stretch" UseLayoutRounding="False" Foreground="White"/>
         </Grid>
         <Grid Margin="457,166,0,0" Background="#1F1B24">
             <Grid>
-                <lvc:CartesianChart Grid.Row="1" AnimationsSpeed="0:0:0.5" Hoverable="False" DataTooltip="{x:Null}">
+                <lvc:CartesianChart Grid.Row="1" Hoverable="False" DataTooltip="{x:Null}">
                     <lvc:CartesianChart.Series>
                         <lvc:LineSeries Values="{Binding ChartValues}" 
                                         PointGeometry="{x:Null}" 
@@ -48,8 +55,7 @@
                                         Fill="Transparent"/>
                     </lvc:CartesianChart.Series>
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis LabelFormatter="{Binding DateTimeFormatter}" 
-                                  MaxValue="{Binding AxisMax}" 
+                        <lvc:Axis MaxValue="{Binding AxisMax}" 
                                   MinValue="{Binding AxisMin}"
                                   Unit="{Binding AxisUnit}">
                             <lvc:Axis.Separator>

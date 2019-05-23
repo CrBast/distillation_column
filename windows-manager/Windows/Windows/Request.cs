@@ -1,4 +1,4 @@
-﻿namespace Windows
+﻿namespace Arduino_Viewer
 {
     public class Request
     {

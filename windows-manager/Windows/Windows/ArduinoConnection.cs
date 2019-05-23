@@ -4,7 +4,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Windows
+namespace Arduino_Viewer
 {
     class ArduinoConnection
     {
