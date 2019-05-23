@@ -13,11 +13,10 @@ Heating System Concept - Arduino Uno &amp; WPF
 - **2 xc LED**
 
 # Schema
-![schema_cable](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema_cable.PNG)
 
-<br>
-
-![schema](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema.PNG)
+With cables            |  Without cables
+:-------------------------:|:-------------------------:
+![schema_cable](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema_cable.PNG)  |  ![schema](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema.PNG)
 
 # Schematic view
 
