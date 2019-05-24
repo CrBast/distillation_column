@@ -1,131 +1,188 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using LiveCharts;
-using LiveCharts.Wpf;
 
-namespace Windows
+namespace Arduino_Viewer
 {
     /// <summary>
     /// Logique d'interaction pour MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
-        SerialPort sp;
+        public static int Counter = 0;
+
         public MainWindow()
         {
             InitializeComponent();
 
-            SeriesCollection = new SeriesCollection
-            {
-                new LineSeries
-                {
-                    Title = "Series 1",
-                    Values = new ChartValues<double> { 4, 6, 5, 2 ,4 }
-                },
-                new LineSeries
-                {
-                    Title = "Series 2",
-                    Values = new ChartValues<double> { 6, 7, 3, 4 ,6 },
-                    PointGeometry = null
-                },
-                new LineSeries
-                {
-                    Title = "Series 3",
-                    Values = new ChartValues<double> { 4,2,7,2,7 },
-                    PointGeometry = DefaultGeometries.Square,
-                    PointGeometrySize = 15
-                }
-            };
-
-            Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" };
-            YFormatter = value => value.ToString("C");
-
-            //modifying the series collection will animate and update the chart
-            SeriesCollection.Add(new LineSeries
-            {
-                Title = "Series 4",
-                Values = new ChartValues<double> { 5, 3, 2, 4 },
-                LineSmoothness = 0, //0: straight lines, 1: really smooth lines
-                PointGeometry = Geometry.Parse("m 25 70.36218 20 -28 -20 22 -8 -6 z"),
-                PointGeometrySize = 50,
-                PointForeground = Brushes.Gray
-            });
-
-            //modifying any series values will also animate and update the chart
-            SeriesCollection[3].Values.Add(5d);
-
             DataContext = this;
 
+            Gauge.Value = 25;
 
-            string[] ports = SerialPort.GetPortNames();
-            foreach (string port in ports)
+            LbxCom.Items.Clear();
+            foreach (string port in SerialPort.GetPortNames())
             {
-                lbxCom.Items.Add(port);
+                LbxCom.Items.Add(port);
             }
-            
         }
 
-        public SeriesCollection SeriesCollection { get; set; }
-        public string[] Labels { get; set; }
-        public Func<double, string> YFormatter { get; set; }
-
+        /// <summary>
+        /// Add new data on real-time chart
+        /// </summary>
+        /// <param name="temp">Value</param>
         public void AddNewTemperature(double temp)
         {
-
+            try
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    cc.AddPoint(temp);
+                });
+                
+            }
+            catch
+            {
+                // ignored
+            }
         }
 
         public void AddLog(string text)
         {
             Dispatcher.Invoke(() =>
             {
-                tbxLogs.AppendText($"{text.ToString()}");
-                tbxLogs.ScrollToEnd();
+                TbxLogs.AppendText(text);
+                TbxLogs.ScrollToEnd();
             });
-            
         }
 
-        private void DataReceivedHandler(
-                        object sender,
-                        SerialDataReceivedEventArgs e)
+        #region Arduino data processing
+        /// <summary>
+        /// Processes the data received by the Arduino
+        /// </summary>
+        /// <param name="text">Data received by the Arduino</param>
+        public void CommanderOfCommand(string text)
         {
-            SerialPort sp = (SerialPort)sender;
-            string indata = sp.ReadExisting();
-            AddLog(indata);
+            AddLog(text);
+            var requests = ComStringSplitter(text);
+
+
+            foreach (Request request in requests)
+            {
+                switch (request.Type)
+                {
+                    case Request.TypeState:
+                        Dispatcher.Invoke(() => { LblState.Content = request.Content; });
+                        break;
+                    case Request.TypeInfo:
+                        Dispatcher.Invoke(() =>
+                        {
+                            try
+                            {
+                                var temperature = Convert.ToDouble(request.Content.Replace(".", ","));
+                                AddNewTemperature(temperature);
+                                Gauge.Value = temperature;
+                            }
+                            catch (Exception e)
+                            {
+                                Console.Write(e);
+                            }
+                        });
+                        break;
+                    case Request.TypeHeatingPower:
+                        Dispatcher.Invoke(() => { LblStatePower.Content = request.Content; });
+                        break;
+                }
+            }
         }
 
+        /// <summary>
+        /// Split string to object 'request'
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns>List of Request</returns>
+        public List<Request> ComStringSplitter(string s)
+        {
+            List<Request> array = new List<Request>();
+
+            var requests = ArduinoConnection.GetRequests(s);
+
+            foreach (var request in requests)
+            {
+                Request r = new Request {FullRequest = request};
+                if (request.StartsWith(Request.TypeInfo))
+                {
+                    r.Type = Request.TypeInfo;
+                    r.Content = request.Replace(Request.TypeInfo, string.Empty);
+                }
+                else if (request.StartsWith(Request.TypeHeatingPower))
+                {
+                    r.Type = Request.TypeHeatingPower;
+                    r.Content = request.Replace(Request.TypeHeatingPower, string.Empty);
+                }
+                else if (request.StartsWith(Request.TypeState))
+                {
+                    r.Type = Request.TypeState;
+                    r.Content = request.Replace(Request.TypeState, string.Empty);
+                }
+
+                array.Add(r);
+            }
+
+            return array;
+        }
+        #endregion
+
+        public void DataReceivedHandler(
+            object sender,
+            SerialDataReceivedEventArgs e)
+        {
+            var sp = (SerialPort) sender;
+            CommanderOfCommand(sp.ReadExisting());
+        }
+
+        #region Window Events
         private void lbxCom_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var lbx = (ListBox)sender;
-            sp = new SerialPort(lbx.SelectedItem.ToString());
-            sp.BaudRate = 9600;
-            sp.Parity = Parity.None;
-            sp.StopBits = StopBits.One;
-            sp.DataBits = 8;
-            sp.Handshake = Handshake.None;
-            sp.RtsEnable = true;
+            var lbx = (ListBox) sender;
+            if (lbx.SelectedItem != null)
+            {
+                BtnCloseCom.IsEnabled = true;
+                ArduinoConnection.SetCom(lbx.SelectedItem.ToString());
 
-            sp.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
-
-            sp.Open();
+                ArduinoConnection.GetInstance().DataReceived += DataReceivedHandler;
+                ArduinoConnection.Go();
+                AddLog($"Connection to {ArduinoConnection.GetInstance().PortName} is open\r\n");
+                BtnRefreshCom.IsEnabled = false;
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if(sp != null)
-                sp.Close();
+            ArduinoConnection.GetInstance().DataReceived -= DataReceivedHandler;
+            ArduinoConnection.Close();
+            TbxLogs.Clear();
+        }
+
+        private void btn_closeCOM_Click(object sender, RoutedEventArgs e)
+        {
+            ArduinoConnection.GetInstance().DataReceived -= DataReceivedHandler;
+            ArduinoConnection.Close();
+            LbxCom.UnselectAll();
+            AddLog($"Connection to {ArduinoConnection.GetInstance().PortName} is closed\r\n");
+            BtnCloseCom.IsEnabled = false;
+            BtnRefreshCom.IsEnabled = true;
+        }
+
+        private void BtnRefreshCom_Click(object sender, RoutedEventArgs e)
+        {
+            LbxCom.Items.Clear();
+            foreach (string port in SerialPort.GetPortNames())
+            {
+                LbxCom.Items.Add(port);
+            }
         }
     }
+    #endregion
 }
