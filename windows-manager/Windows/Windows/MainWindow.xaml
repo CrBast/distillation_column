@@ -6,7 +6,7 @@
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         xmlns:local="clr-namespace:Arduino_Viewer" x:Class="Arduino_Viewer.MainWindow"
         mc:Ignorable="d"
-        Title="Arduino Datas Viewer" Height="669.468" Width="1136.41" Closing="Window_Closing" Icon="arrow.ico"
+        Title="Arduino Data Viewer" Height="669.468" Width="1136.41" Closing="Window_Closing" Icon="arrow.ico"
         >
     <Grid Background="White">
         <Grid HorizontalAlignment="Left" Width="452" Background="#1F1B24">

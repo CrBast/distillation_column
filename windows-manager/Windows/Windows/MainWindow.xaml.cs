@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO.Ports;
 using System.Windows;
 using System.Windows.Controls;
-using Windows;
-using LiveCharts;
-using LiveCharts.Configurations;
 
 namespace Arduino_Viewer
 {
@@ -21,8 +17,6 @@ namespace Arduino_Viewer
         {
             InitializeComponent();
 
-            
-
             DataContext = this;
 
             Gauge.Value = 25;
@@ -34,6 +28,10 @@ namespace Arduino_Viewer
             }
         }
 
+        /// <summary>
+        /// Add new data on real-time chart
+        /// </summary>
+        /// <param name="temp">Value</param>
         public void AddNewTemperature(double temp)
         {
             try
@@ -59,7 +57,11 @@ namespace Arduino_Viewer
             });
         }
 
-
+        #region Arduino data processing
+        /// <summary>
+        /// Processes the data received by the Arduino
+        /// </summary>
+        /// <param name="text">Data received by the Arduino</param>
         public void CommanderOfCommand(string text)
         {
             AddLog(text);
@@ -95,7 +97,11 @@ namespace Arduino_Viewer
             }
         }
 
-
+        /// <summary>
+        /// Split string to object 'request'
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns>List of Request</returns>
         public List<Request> ComStringSplitter(string s)
         {
             List<Request> array = new List<Request>();
@@ -126,6 +132,7 @@ namespace Arduino_Viewer
 
             return array;
         }
+        #endregion
 
         public void DataReceivedHandler(
             object sender,
@@ -135,6 +142,7 @@ namespace Arduino_Viewer
             CommanderOfCommand(sp.ReadExisting());
         }
 
+        #region Window Events
         private void lbxCom_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var lbx = (ListBox) sender;
@@ -176,4 +184,5 @@ namespace Arduino_Viewer
             }
         }
     }
+    #endregion
 }
