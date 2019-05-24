@@ -8,7 +8,7 @@ namespace Arduino_Viewer
 {
     public class MeasureModel
     {
-        public double value { get; set; }
-        public int compteur { get; set; }
+        public int Counter { get; set; }
+        public double Value { get; set; }
     }
 }

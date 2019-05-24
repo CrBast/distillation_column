@@ -147,6 +147,7 @@ bool proportional_control()
     ldcSetTextByLine(1, "\t" + (String)state + "\t" + (String)activity);
 
     Serial.println("-i " + (String)actual_temp);
+    Serial.println("-s " + (String)state);
     Serial.println("-p " + (String)activity);
 
     int diffBtw25AndActualTemp = 25 - ambiant_temp;
@@ -164,11 +165,11 @@ bool proportional_control()
       {
         if (actual_temp == todo_temp)
         {
-          activity = 50 * diffBtw25AndActualTemp;
+          activity = 100 * diffBtw25AndActualTemp;
         }
         else
         {
-          activity = 25 * diffBtw25AndActualTemp;
+          activity = 50 * diffBtw25AndActualTemp;
         }
       }
     }
@@ -219,9 +220,6 @@ bool proportional_control()
       loop_lastTemp = actual_temp;
     }
 
-    if(activity > 1000){
-      activity = 1000;
-    }
     if (actual_temp >= todo_temp)
     {
       return true;

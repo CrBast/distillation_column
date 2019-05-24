@@ -15,14 +15,13 @@ namespace Arduino_Viewer
     /// </summary>
     public partial class MainWindow
     {
-        private double _axisMax;
-        private double _axisMin;
-        private double _trend;
         public static int Counter = 0;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            
 
             DataContext = this;
 
@@ -33,47 +32,6 @@ namespace Arduino_Viewer
             {
                 LbxCom.Items.Add(port);
             }
-
-            // Datas viewer 
-            var mapper = Mappers.Xy<MeasureModel>()
-                .X(model => model.compteur) //use DateTime.Ticks as X
-                .Y(model => model.value); //use the value property as Y
-
-            Charting.For<MeasureModel>(mapper);
-
-            SetAxisLimits();
-
-            ChartValues = new ChartValues<MeasureModel>();
-
-
-        }
-
-        public ChartValues<MeasureModel> ChartValues { get; set; }
-        public Func<double, string> DateTimeFormatter { get; set; }
-        public double AxisStep { get; set; }
-        public double AxisUnit { get; set; }
-        public SeriesCollection SeriesCollection { get; set; }
-        public string[] Labels { get; set; }
-        public Func<double, string> YFormatter { get; set; }
-
-        public double AxisMax
-        {
-            get { return _axisMax; }
-            set
-            {
-                _axisMax = value;
-                OnPropertyChanged("AxisMax");
-            }
-        }
-
-        public double AxisMin
-        {
-            get { return _axisMin; }
-            set
-            {
-                _axisMin = value;
-                OnPropertyChanged("AxisMin");
-            }
         }
 
         public void AddNewTemperature(double temp)
@@ -82,17 +40,11 @@ namespace Arduino_Viewer
             {
                 Dispatcher.Invoke(() =>
                 {
-                    SetAxisLimits();
-                    ChartValues.Add(new MeasureModel()
-                    {
-                        compteur = Counter,
-                        value = temp
-                    });
-                    Counter++;
+                    cc.AddPoint(temp);
                 });
                 
             }
-            catch (Exception e)
+            catch
             {
                 // ignored
             }
@@ -222,20 +174,6 @@ namespace Arduino_Viewer
             {
                 LbxCom.Items.Add(port);
             }
-        }
-
-        private void SetAxisLimits()
-        {
-            AxisMax = Counter + 1;
-            AxisMin = Counter < 100 ? 0 : Counter - 100;
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName = null)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
