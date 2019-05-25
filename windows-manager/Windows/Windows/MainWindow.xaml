@@ -39,7 +39,7 @@
             <Button x:Name="BtnRefreshCom" Content="Refresh COM" HorizontalAlignment="Left" Margin="248,109,0,0" VerticalAlignment="Top" Width="175" Height="30" Click="BtnRefreshCom_Click"/>
             <Label x:Name="StatePower" Content="Puissance de chauffe : " Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="10,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic"/>
             <Label x:Name="LblStatePower" Content="..." Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="303,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontWeight="Bold" FontStyle="Italic" Width="80"/>
-            <Label x:Name="sur10000" Content="/10000" Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="365,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontStyle="Italic"/>
+            <Label x:Name="sur1000" Content="/1000" Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="365,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontStyle="Italic"/>
         </Grid>
         <Grid Height="160" Margin="457,0,0,0" VerticalAlignment="Top">
             <TextBox x:Name="TbxLogs" MaxLines="10" Background="#1F1B24" HorizontalAlignment="Stretch" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="true" UseLayoutRounding="False" Foreground="White"/>

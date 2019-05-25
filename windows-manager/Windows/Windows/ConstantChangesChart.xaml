@@ -14,7 +14,7 @@
                                 PointGeometry="{x:Null}" 
                                 LineSmoothness="1"
                                 StrokeThickness="2" 
-                                Stroke="#F34336"
+                                Stroke="#87ff2a"
                                 Fill="Transparent"/>
             </wpf:CartesianChart.Series>
             <wpf:CartesianChart.AxisX>
