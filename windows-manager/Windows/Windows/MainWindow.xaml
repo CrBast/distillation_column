@@ -10,15 +10,15 @@
         >
     <Grid Background="White">
         <Grid HorizontalAlignment="Left" Width="452" Background="#1F1B24">
-            <GroupBox x:Name="Configuration" HorizontalAlignment="Left" Height="152" Margin="10,10,0,0" VerticalAlignment="Top" Width="432">
+            <GroupBox x:Name="Configuration" HorizontalAlignment="Left" Height="149" Margin="10,10,0,0" VerticalAlignment="Top" Width="432">
                 <GroupBox.Header>
                     <Label Foreground="White" Content="Configuration"/>
                 </GroupBox.Header>
                 <ListBox x:Name="LbxCom" HorizontalAlignment="Left" Height="92" VerticalAlignment="Top" Width="183" Margin="10,10,0,0" SelectionChanged="lbxCom_SelectionChanged"/>
             </GroupBox>
-            <Label x:Name="StateDef" Content="Etat actuel : " Foreground="White" FontSize="40"  HorizontalAlignment="Left" Margin="10,185,0,0" VerticalAlignment="Top" FontFamily="Century Gothic"/>
-            <Label x:Name="LblState" Content="..." Foreground="White" FontSize="40"  HorizontalAlignment="Left" Margin="318,185,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontWeight="Bold" FontStyle="Italic"/>
-            <Grid HorizontalAlignment="Left" Margin="10,326,0,10" Width="432">
+            <Label x:Name="StateDef" Content="Etat actuel : " Foreground="White" FontSize="40"  HorizontalAlignment="Left" Margin="13,159,0,0" VerticalAlignment="Top" FontFamily="Century Gothic"/>
+            <Label x:Name="LblState" Content="..." Foreground="White" FontSize="40"  HorizontalAlignment="Left" Margin="321,159,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontWeight="Bold" FontStyle="Italic"/>
+            <Grid HorizontalAlignment="Left" Margin="10,338,0,10" Width="432">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="47*"/>
                     <ColumnDefinition Width="169*"/>
@@ -37,9 +37,10 @@
             </Grid>
             <Button x:Name="BtnCloseCom" IsEnabled="False" Content="Close connection" HorizontalAlignment="Left" Margin="248,49,0,0" VerticalAlignment="Top" Width="175" Height="30" Click="btn_closeCOM_Click"/>
             <Button x:Name="BtnRefreshCom" Content="Refresh COM" HorizontalAlignment="Left" Margin="248,109,0,0" VerticalAlignment="Top" Width="175" Height="30" Click="BtnRefreshCom_Click"/>
-            <Label x:Name="StatePower" Content="Puissance de chauffe : " Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="10,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic"/>
-            <Label x:Name="LblStatePower" Content="..." Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="303,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontWeight="Bold" FontStyle="Italic" Width="80"/>
-            <Label x:Name="sur1000" Content="/1000" Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="365,256,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontStyle="Italic"/>
+            <Label x:Name="StatePower" Content="Puissance de chauffe : " Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="13,230,0,0" VerticalAlignment="Top" FontFamily="Century Gothic"/>
+            <Label x:Name="LblStatePower" Content="..." Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="306,230,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontWeight="Bold" FontStyle="Italic" Width="80"/>
+            <Label x:Name="sur1000" Content="/1000" Foreground="White" FontSize="24"  HorizontalAlignment="Left" Margin="368,230,0,0" VerticalAlignment="Top" FontFamily="Century Gothic" FontStyle="Italic"/>
+            <Button x:Name="BtnExportCsv" Content="Enregistrer les données en CSV" HorizontalAlignment="Left" Margin="13,282,0,0" VerticalAlignment="Top" Width="429" Height="31" Background="White" OpacityMask="Black" Foreground="Black" BorderBrush="White" Opacity="0.41" Click="BtnExportCsv_Click"/>
         </Grid>
         <Grid Height="160" Margin="457,0,0,0" VerticalAlignment="Top">
             <TextBox x:Name="TbxLogs" MaxLines="10" Background="#1F1B24" HorizontalAlignment="Stretch" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="true" UseLayoutRounding="False" Foreground="White"/>

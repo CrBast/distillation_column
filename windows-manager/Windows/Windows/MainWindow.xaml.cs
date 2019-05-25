@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Ports;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +13,7 @@ namespace Arduino_Viewer
     public partial class MainWindow
     {
         public static int Counter = 0;
+        private List<String> _datas = new List<string>();
 
         public MainWindow()
         {
@@ -80,6 +82,7 @@ namespace Arduino_Viewer
                         {
                             try
                             {
+                                _datas.Add(request.Content);
                                 var temperature = Convert.ToDouble(request.Content.Replace(".", ","));
                                 AddNewTemperature(temperature);
                                 Gauge.Value = temperature;
@@ -181,6 +184,25 @@ namespace Arduino_Viewer
             foreach (string port in SerialPort.GetPortNames())
             {
                 LbxCom.Items.Add(port);
+            }
+        }
+
+        private void BtnExportCsv_Click(object sender, RoutedEventArgs e)
+        {
+            if (_datas != null)
+            {
+                string fileName = $"./data/{DateTime.Now:d.M.yyyy_HH-mm-ss}.csv";
+                try
+                {
+                    if (!Directory.Exists("./data/")) { Directory.CreateDirectory("./data/"); }
+                    var writer = new StreamWriter(fileName);
+                    writer.Write(String.Join("\r\n", _datas.ToArray()));
+                    writer.Close();
+                }
+                catch
+                {
+                    BtnExportCsv.Content = "Error";
+                }
             }
         }
     }
