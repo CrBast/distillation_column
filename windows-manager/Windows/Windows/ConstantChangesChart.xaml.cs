@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using LiveCharts;
 using LiveCharts.Configurations;
 
@@ -12,6 +13,8 @@ namespace Arduino_Viewer
         private double _axisMax;
         private double _axisMin;
         private int _counter = 1;
+        private double _maxValue = 29;
+        private double _minValue = 26.5;
 
         public ConstantChangesChart()
         {
@@ -58,6 +61,27 @@ namespace Arduino_Viewer
                 OnPropertyChanged("AxisMin");
             }
         }
+
+        public double YAxisMax
+        {
+            get { return _maxValue; }
+            set
+            {
+                _maxValue = value;
+                OnPropertyChanged("YAxisMax");
+            }
+        }
+
+        public double YAxisMin
+        {
+            get { return _minValue - 0.5; }
+            set
+            {
+                _minValue = value;
+                OnPropertyChanged("YAxisMin");
+            }
+        }
+
         #endregion
 
         public bool IsReading { get; set; }
@@ -77,6 +101,17 @@ namespace Arduino_Viewer
 
             AxisMax = _counter < 150 ? 150 : _counter;
             AxisMin = _counter <= 150 ? 0 : _counter - 150;
+
+            if (value < _minValue)
+            {
+                _minValue = Math.Ceiling(value) - 1;
+                YAxisMin = _minValue;
+            }
+            if (value > _maxValue)
+            {
+                _maxValue = Math.Ceiling(value);
+                YAxisMax = _maxValue;
+            }
 
             //lets only use the last 150 values
             if (ChartValues.Count > 150) ChartValues.RemoveAt(0);

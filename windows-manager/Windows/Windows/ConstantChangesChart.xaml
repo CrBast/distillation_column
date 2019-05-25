@@ -27,8 +27,8 @@
                 </wpf:Axis>
             </wpf:CartesianChart.AxisX>
             <wpf:CartesianChart.AxisY>
-                <wpf:Axis MaxValue="29" 
-                          MinValue="24.5"
+                <wpf:Axis MaxValue="{Binding YAxisMax}" 
+                          MinValue="{Binding YAxisMin}"
                           BarUnit="2">
                 </wpf:Axis>
             </wpf:CartesianChart.AxisY>
