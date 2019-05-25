@@ -10,14 +10,21 @@ Heating System Concept - Arduino Uno &amp; WPF
 - **Thermal Sensor** (*DS18B20 - Dallas*)
 - **Transistor** (*BD675*)
 - **100 Ω resistance**
-- **2 xc LED**
+- **2 x LED**
 
 # Schema
 
-With cables            |  Without cables
-:-------------------------:|:-------------------------:
-![schema_cable](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema_cable.PNG)  |  ![schema](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema.PNG)
+|                                                With cables                                                |                                        Without cables                                         |
+| :-------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------: |
+| ![schema_cable](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema_cable.PNG) | ![schema](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema.PNG) |
 
 # Schematic view
 
 ![schema_electrique](https://raw.githubusercontent.com/CrBast/distillation_column/master/doc/schema_electrique.PNG)
+
+# Windows App
+
+The application allows you to view in real time various information about the Arduino assembly.
+
+## GUI
+![gui](https://raw.githubusercontent.com/CrBast/distillation_column/master/windows-manager/gui.PNG)
