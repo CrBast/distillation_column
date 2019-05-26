@@ -93,35 +93,35 @@ namespace Arduino_Viewer
         /// <param name="value"></param>
         public void AddPoint(double value)
         {
-            ChartValues.Add(new MeasureModel
+            if (value < 32 && value > 22 )
             {
-                Counter = _counter,
-                Value = value
-            });
+                if (value < _minValue)
+                {
+                    _minValue = Math.Ceiling(value) - 1;
+                    YAxisMin = _minValue;
+                }
+                if (value > _maxValue)
+                {
+                    _maxValue = Math.Ceiling(value);
+                    YAxisMax = _maxValue;
+                }
 
-            AxisMax = _counter < 150 ? 150 : _counter;
-            AxisMin = _counter <= 150 ? 0 : _counter - 150;
+                ChartValues.Add(new MeasureModel
+                {
+                    Counter = _counter,
+                    Value = value
+                });
 
-            if (value < _minValue)
-            {
-                _minValue = Math.Ceiling(value) - 1;
-                YAxisMin = _minValue;
+                AxisMax = _counter < 150 ? 150 : _counter;
+                AxisMin = _counter <= 150 ? 0 : _counter - 150;
+
+
+
+                //lets only use the last 150 values
+                if (ChartValues.Count > 150) ChartValues.RemoveAt(0);
+
+                _counter++;
             }
-            if (value > _maxValue)
-            {
-                _maxValue = Math.Ceiling(value);
-                YAxisMax = _maxValue;
-            }
-
-            //lets only use the last 150 values
-            if (ChartValues.Count > 150) ChartValues.RemoveAt(0);
-
-            if (_counter == 0 || value > 30 || value < 22 )
-            {
-                ChartValues.RemoveAt(0);
-            }
-
-            _counter++;
         }
         #endregion
 
